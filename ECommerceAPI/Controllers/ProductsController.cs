@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ECommerceAPI.Models;
 
 namespace ECommerceAPI.Controllers
 {
@@ -7,14 +8,29 @@ namespace ECommerceAPI.Controllers
     public class ProductsController : ControllerBase
     {
         [HttpGet]
-        public List<string> Get()
+        public List<Product> Get()
         {
-            return new List<string>
-    {
-        "Laptop",
-        "Mouse",
-        "Klavye"
-    };
+            return new List<Product>
+            {
+                new Product
+                {
+                    Id = 1,
+                    Name = "Laptop",
+                    Price = 35000
+                },
+                new Product
+                {
+                    Id = 2,
+                    Name = "Mouse",
+                    Price = 500
+                },
+                new Product
+                {
+                    Id = 3,
+                    Name = "Klavye",
+                    Price = 1200
+                }
+            };
         }
     }
 }
