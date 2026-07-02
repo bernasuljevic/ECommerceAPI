@@ -1,82 +1,89 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ECommerceAPI.Models;
+using ECommerceAPI.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace ECommerceAPI.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-
     public class ProductsController : ControllerBase
     {
-        private static readonly List<Product> Products = new()
-            {
-                new Product
-                {
-                    Id = 1,
-                    Name = "Laptop",
-                    Price = 35000,
-                    Stock = 15,
-                    Category = "Elektronik"
-                },
-                new Product
-                {
-                    Id = 2,
-                    Name = "Mouse",
-                    Price = 500,
-                    Stock = 40,
-                    Category = "Aksesuar"
-                },
-                new Product
-                {
-                    Id = 3,
-                    Name = "Klavye",
-                    Price = 1200,
-                    Stock = 25,
-                    Category = "Aksesuar"
-                }
-            
-    
-};
+        private readonly AppDbContext _context;
 
-        public static List<Product> Products1 => Products;
+        public ProductsController(AppDbContext context)
+        {
+            _context = context;
+        }
 
         [HttpGet]
         public List<Product> Get()
         {
-            return Products1;
+            return _context.Products.ToList();
         }
 
         [HttpGet("{id}")]
-        public Product GetById(int id)
+        public IActionResult GetById(int id)
         {
-            return Products1.FirstOrDefault(p => p.Id == id);
-        }
-        [HttpGet("count")]
-        public int GetCount()
-        {
-            return Products1.Count;
-        }
-
-        [HttpPost]
-        public Product AddProduct(Product product)
-        {
-            Products1.Add(product);
-
-            return product;
-        }
-        [HttpDelete("{id}")]
-        public string DeleteProduct(int id)
-        {
-            var product = Products1.FirstOrDefault(p => p.Id == id);
+            var product = _context.Products.FirstOrDefault(p => p.Id == id);
 
             if (product == null)
             {
-                return "Ürün bulunamadı";
+                return NotFound("Ürün bulunamadı");
             }
 
-            Products1.Remove(product);
+            return Ok(product);
+        }
 
-            return "Ürün silindi";
+        [HttpGet("count")]
+        public int GetCount()
+        {
+            return _context.Products.Count();
+        }
+
+        [HttpPost]
+        public IActionResult AddProduct(Product product)
+        {
+            _context.Products.Add(product);
+            _context.SaveChanges();
+
+            return Ok(product);
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteProduct(int id)
+        {
+            var product = _context.Products.FirstOrDefault(p => p.Id == id);
+
+            if (product == null)
+            {
+                return NotFound("Ürün bulunamadı");
+            }
+
+            _context.Products.Remove(product);
+            _context.SaveChanges();
+
+            return Ok("Ürün silindi");
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult UpdateProduct(int id, Product updatedProduct)
+        {
+            var product = _context.Products.FirstOrDefault(p => p.Id == id);
+
+            if (product == null)
+            {
+                return NotFound("Ürün bulunamadı");
+            }
+
+            product.Name = updatedProduct.Name;
+            product.Price = updatedProduct.Price;
+            product.Stock = updatedProduct.Stock;
+            product.Category = updatedProduct.Category;
+
+            _context.SaveChanges();
+
+            return Ok(product);
         }
     }
 }
