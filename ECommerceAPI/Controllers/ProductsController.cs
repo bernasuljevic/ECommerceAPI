@@ -1,4 +1,5 @@
-﻿using ECommerceAPI.DTOs;
+﻿using ECommerceAPI.Data;
+using ECommerceAPI.DTOs;
 using ECommerceAPI.Models;
 using ECommerceAPI.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -10,10 +11,14 @@ namespace ECommerceAPI.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductRepository _repo;
+        private readonly AppDbContext _context;
 
-        public ProductsController(IProductRepository repo)
+        public ProductsController(
+            IProductRepository repo,
+            AppDbContext context)
         {
             _repo = repo;
+            _context = context;
         }
 
         [HttpGet]
@@ -101,6 +106,48 @@ namespace ECommerceAPI.Controllers
             await _repo.SaveChangesAsync();
 
             return Ok(product);
+        }
+        [HttpPost("transaction-test")]
+        public async Task<IActionResult> TransactionTest()
+        {
+            using var transaction =
+                await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                var product1 = new Product
+                {
+                    Name = "Transaction Test 1",
+                    Price = 100,
+                    Stock = 1,
+                    Category = "Test"
+                };
+
+                _context.Products.Add(product1);
+                await _context.SaveChangesAsync();
+
+                throw new Exception("Bilinçli hata oluşturuldu.");
+
+                var product2 = new Product
+                {
+                    Name = "Transaction Test 2",
+                    Price = 200,
+                    Stock = 2,
+                    Category = "Test"
+                };
+
+                _context.Products.Add(product2);
+                await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                return Ok();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
     }
 }

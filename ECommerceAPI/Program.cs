@@ -1,6 +1,7 @@
 using ECommerceAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using ECommerceAPI.Repositories;
+using ECommerceAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,7 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 var app = builder.Build();
 
+app.UseMiddleware<ExceptionMiddleware>();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
