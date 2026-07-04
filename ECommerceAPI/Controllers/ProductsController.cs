@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ECommerceAPI.DTOs;
 using ECommerceAPI.Models;
-using ECommerceAPI.Data;
-using Microsoft.EntityFrameworkCore;
+using ECommerceAPI.Repositories;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerceAPI.Controllers
 {
@@ -9,23 +9,23 @@ namespace ECommerceAPI.Controllers
     [Route("[controller]")]
     public class ProductsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IProductRepository _repo;
 
-        public ProductsController(AppDbContext context)
+        public ProductsController(IProductRepository repo)
         {
-            _context = context;
+            _repo = repo;
         }
 
         [HttpGet]
         public List<Product> Get()
         {
-            return _context.Products.ToList();
+            return _repo.GetAll();
         }
 
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            var product = _context.Products.FirstOrDefault(p => p.Id == id);
+            var product = _repo.GetById(id);
 
             if (product == null)
             {
@@ -38,50 +38,67 @@ namespace ECommerceAPI.Controllers
         [HttpGet("count")]
         public int GetCount()
         {
-            return _context.Products.Count();
+            return _repo.Count();
         }
 
         [HttpPost]
-        public IActionResult AddProduct(Product product)
+        public IActionResult AddProduct(CreateProductDto dto)
         {
-            _context.Products.Add(product);
-            _context.SaveChanges();
+            var product = new Product
+            {
+                Name = dto.Name,
+                Price = dto.Price,
+                Stock = dto.Stock,
+                Category = dto.Category
+            };
 
-            return Ok(product);
+            _repo.Add(product);
+            _repo.SaveChanges();
+
+            var productDto = new ProductDto
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Price = product.Price,
+                Stock = product.Stock,
+                Category = product.Category
+            };
+
+            return Ok(productDto);
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeleteProduct(int id)
         {
-            var product = _context.Products.FirstOrDefault(p => p.Id == id);
+            var product = _repo.GetById(id);
 
             if (product == null)
             {
                 return NotFound("Ürün bulunamadı");
             }
 
-            _context.Products.Remove(product);
-            _context.SaveChanges();
+            _repo.Delete(product);
+            _repo.SaveChanges();
 
             return Ok("Ürün silindi");
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateProduct(int id, Product updatedProduct)
+        public IActionResult UpdateProduct(int id, UpdateProductDto dto)
         {
-            var product = _context.Products.FirstOrDefault(p => p.Id == id);
+            var product = _repo.GetById(id);
 
             if (product == null)
             {
                 return NotFound("Ürün bulunamadı");
             }
 
-            product.Name = updatedProduct.Name;
-            product.Price = updatedProduct.Price;
-            product.Stock = updatedProduct.Stock;
-            product.Category = updatedProduct.Category;
+            product.Name = dto.Name;
+            product.Price = dto.Price;
+            product.Stock = dto.Stock;
+            product.Category = dto.Category;
 
-            _context.SaveChanges();
+            _repo.SaveChanges();
 
             return Ok(product);
         }
