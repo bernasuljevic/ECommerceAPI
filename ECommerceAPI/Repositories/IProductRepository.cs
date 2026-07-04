@@ -4,9 +4,10 @@ namespace ECommerceAPI.Repositories
 {
     public interface IProductRepository
     {
-        List<Product> GetAll();
-
-        Product? GetById(int id);
+        Task<List<Product>> GetAllAsync();
+        Task<Product?> GetByIdAsync(int id);
+        Task<bool> SaveChangesAsync();
+        Task<int> CountAsync();
 
         void Add(Product product);
 
@@ -14,8 +15,6 @@ namespace ECommerceAPI.Repositories
 
         void Delete(Product product);
 
-        bool SaveChanges();
-
-        int Count();
+        
     }
 }

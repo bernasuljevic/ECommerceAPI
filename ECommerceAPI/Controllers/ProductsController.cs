@@ -17,15 +17,15 @@ namespace ECommerceAPI.Controllers
         }
 
         [HttpGet]
-        public List<Product> Get()
+        public async Task<List<Product>> Get()
         {
-            return _repo.GetAll();
+            return await _repo.GetAllAsync();
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var product = _repo.GetById(id);
+            var product = await _repo.GetByIdAsync(id);
 
             if (product == null)
             {
@@ -36,13 +36,13 @@ namespace ECommerceAPI.Controllers
         }
 
         [HttpGet("count")]
-        public int GetCount()
+        public async Task<int> GetCount()
         {
-            return _repo.Count();
+            return await _repo.CountAsync();
         }
 
         [HttpPost]
-        public IActionResult AddProduct(CreateProductDto dto)
+        public async Task<IActionResult> AddProduct(CreateProductDto dto)
         {
             var product = new Product
             {
@@ -53,7 +53,7 @@ namespace ECommerceAPI.Controllers
             };
 
             _repo.Add(product);
-            _repo.SaveChanges();
+            await _repo.SaveChangesAsync();
 
             var productDto = new ProductDto
             {
@@ -68,9 +68,9 @@ namespace ECommerceAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteProduct(int id)
+        public async Task<IActionResult> DeleteProduct(int id)
         {
-            var product = _repo.GetById(id);
+            var product = await _repo.GetByIdAsync(id);
 
             if (product == null)
             {
@@ -78,15 +78,15 @@ namespace ECommerceAPI.Controllers
             }
 
             _repo.Delete(product);
-            _repo.SaveChanges();
+            await _repo.SaveChangesAsync();
 
             return Ok("Ürün silindi");
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateProduct(int id, UpdateProductDto dto)
+        public async Task<IActionResult> UpdateProduct(int id, UpdateProductDto dto)
         {
-            var product = _repo.GetById(id);
+            var product = await _repo.GetByIdAsync(id);
 
             if (product == null)
             {
@@ -98,7 +98,7 @@ namespace ECommerceAPI.Controllers
             product.Stock = dto.Stock;
             product.Category = dto.Category;
 
-            _repo.SaveChanges();
+            await _repo.SaveChangesAsync();
 
             return Ok(product);
         }

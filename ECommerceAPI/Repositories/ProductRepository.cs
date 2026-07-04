@@ -1,5 +1,6 @@
 ﻿using ECommerceAPI.Data;
 using ECommerceAPI.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ECommerceAPI.Repositories
 {
@@ -12,14 +13,15 @@ namespace ECommerceAPI.Repositories
             _context = context;
         }
 
-        public List<Product> GetAll()
+        public async Task<List<Product>> GetAllAsync()
         {
-            return _context.Products.ToList();
+            return await _context.Products.ToListAsync();
         }
 
-        public Product? GetById(int id)
+        public async Task<Product?> GetByIdAsync(int id)
         {
-            return _context.Products.FirstOrDefault(p => p.Id == id);
+            return await _context.Products
+                .FirstOrDefaultAsync(p => p.Id == id);
         }
 
         public void Add(Product product)
@@ -29,7 +31,7 @@ namespace ECommerceAPI.Repositories
 
         public void Update(Product product)
         {
-            // EF Core zaten entity'yi takip ediyor
+            // EF Core Change Tracking
         }
 
         public void Delete(Product product)
@@ -37,14 +39,14 @@ namespace ECommerceAPI.Repositories
             _context.Products.Remove(product);
         }
 
-        public bool SaveChanges()
+        public async Task<bool> SaveChangesAsync()
         {
-            return _context.SaveChanges() > 0;
+            return await _context.SaveChangesAsync() > 0;
         }
-        public int Count()
+
+        public async Task<int> CountAsync()
         {
-            return _context.Products.Count();
+            return await _context.Products.CountAsync();
         }
-       
     }
 }
